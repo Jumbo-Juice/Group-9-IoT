@@ -6,6 +6,34 @@ This repo is being used for IoT final project collaboration and final submission
 - Raymond
 - Juji
 
+# Component Flow
+
+```mermaid
+flowchart TB
+    Operator --> Frontend
+    Frontend -->|Registration, commands, telemetry requests| Backend
+    Backend -->|Telemetry views| Frontend
+
+    Backend -->|Registration and telemetry records| DB[(PostgreSQL)]
+
+    Backend -->|Commands| PublicMQTT
+    Backend -->|Registration snapshot and activation| Gateway
+    PublicMQTT -->|Actuator status| Backend
+
+    PublicMQTT -->|Commands| Gateway
+    Gateway -->|Telemetry and actuator status| PublicMQTT
+
+    PublicMQTT -->|Telemetry events| Ingestion
+    Ingestion -->|Committed telemetry| DB
+
+    Gateway <--> |Sensor and actuator messages| PrivateMQTT
+
+    Sensor -->|Telemetry over MQTT| PrivateMQTT
+    PrivateMQTT -->|Commands and status over MQTT| Actuator
+
+    Environment -->|Readings over HTTP| Sensor
+    Actuator -->|Applied state over HTTP| Environment
+```
 
 # Git & GitHub Basic Commands
 
@@ -244,31 +272,3 @@ The system connects sensors and actuators to a frontend through MQTT, HTTP and a
 - **Ingestion Workers:** Process incoming telemetry and store it in PostgreSQL.
     
 - **PostgreSQL:** Stores registration and telemetry records.
-## Component Flow
-
-```mermaid
-flowchart TB
-    Operator --> Frontend
-    Frontend -->|Registration, commands, telemetry requests| Backend
-    Backend -->|Telemetry views| Frontend
-
-    Backend -->|Registration and telemetry records| DB[(PostgreSQL)]
-
-    Backend -->|Commands| PublicMQTT
-    Backend -->|Registration snapshot and activation| Gateway
-    PublicMQTT -->|Actuator status| Backend
-
-    PublicMQTT -->|Commands| Gateway
-    Gateway -->|Telemetry and actuator status| PublicMQTT
-
-    PublicMQTT -->|Telemetry events| Ingestion
-    Ingestion -->|Committed telemetry| DB
-
-    Gateway <--> |Sensor and actuator messages| PrivateMQTT
-
-    Sensor -->|Telemetry over MQTT| PrivateMQTT
-    PrivateMQTT -->|Commands and status over MQTT| Actuator
-
-    Environment -->|Readings over HTTP| Sensor
-    Actuator -->|Applied state over HTTP| Environment
-```
